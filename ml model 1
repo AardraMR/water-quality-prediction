@@ -1,0 +1,72 @@
+
+# Water Potability Prediction (Classification)
+
+import pandas as pd
+import numpy as np
+from sklearn.model_selection import train_test_split, cross_val_score
+from sklearn.preprocessing import StandardScaler
+from sklearn.ensemble import RandomForestClassifier
+from sklearn.metrics import classification_report, confusion_matrix, roc_auc_score
+import xgboost as xgb
+import matplotlib.pyplot as plt
+import seaborn as sns
+
+# Make sure waterQuality1.csv is in the same folder or update path accordingly
+df = pd.read_csv("waterQuality1.csv")
+
+print("Dataset shape:", df.shape)
+print("\nFirst 5 records:")
+display(df.head())
+
+# Handle missing values (impute with median)
+df = df.fillna(df.median())
+
+# Features and Target
+X = df.drop("Potability", axis=1)
+y = df["Potability"]
+
+# Train-Test Split (80-20, stratified for balanced classes)
+X_train, X_test, y_train, y_test = train_test_split(
+    X, y, test_size=0.2, stratify=y, random_state=42
+)
+
+# Scale features
+scaler = StandardScaler()
+X_train = scaler.fit_transform(X_train)
+X_test = scaler.transform(X_test)
+
+rf = RandomForestClassifier(n_estimators=200, random_state=42)
+rf.fit(X_train, y_train)
+y_pred_rf = rf.predict(X_test)
+
+print("\nRandom Forest Results:")
+print(classification_report(y_test, y_pred_rf))
+print("ROC-AUC:", roc_auc_score(y_test, rf.predict_proba(X_test)[:, 1]))
+
+
+xgb_model = xgb.XGBClassifier(
+    n_estimators=300, learning_rate=0.05, max_depth=5, random_state=42
+)
+xgb_model.fit(X_train, y_train)
+y_pred_xgb = xgb_model.predict(X_test)
+
+print("\nXGBoost Results:")
+print(classification_report(y_test, y_pred_xgb))
+print("ROC-AUC:", roc_auc_score(y_test, xgb_model.predict_proba(X_test)[:, 1]))
+
+models = ["Random Forest", "XGBoost"]
+auc_scores = [
+    roc_auc_score(y_test, rf.predict_proba(X_test)[:, 1]),
+    roc_auc_score(y_test, xgb_model.predict_proba(X_test)[:, 1]),
+]
+
+plt.figure(figsize=(6,4))
+sns.barplot(x=models, y=auc_scores, palette="viridis")
+plt.title("Model Comparison (ROC-AUC)")
+plt.ylabel("ROC-AUC Score")
+plt.show()
+
+
+xgb.plot_importance(xgb_model, importance_type="weight", max_num_features=10)
+plt.title("Top 10 Important Features (XGBoost)")
+plt.show()
