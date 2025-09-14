@@ -1,7 +1,7 @@
- Week 2 – Model Training & Testing
+  Model Training & Testing
 
  📌 Objective
-In this week, we trained and evaluated machine learning models to predict **water potability** (0 = not safe, 1 = safe) using physicochemical parameters such as pH, Hardness, Solids, Chloramines, Sulfate, Conductivity, Organic Carbon, Trihalomethanes, and Turbidity.
+we trained and evaluated machine learning models to predict **water potability** (0 = not safe, 1 = safe) using physicochemical parameters such as pH, Hardness, Solids, Chloramines, Sulfate, Conductivity, Organic Carbon, Trihalomethanes, and Turbidity.
 
 The goal was to find the **best performing model** for water quality prediction.
 
