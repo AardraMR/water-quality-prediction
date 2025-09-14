@@ -1,0 +1,39 @@
+import pandas as pd
+from sklearn.model_selection import train_test_split
+from sklearn.preprocessing import StandardScaler
+from sklearn.ensemble import RandomForestClassifier
+from sklearn.metrics import classification_report, confusion_matrix, roc_auc_score
+import xgboost as xgb
+
+# Features & target
+X = df.drop("Potability", axis=1)
+y = df["Potability"]
+
+# Handle missing values
+X = X.fillna(X.median())
+
+# Train-test split
+X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.2, random_state=42, stratify=y)
+
+# Scale features
+scaler = StandardScaler()
+X_train = scaler.fit_transform(X_train)
+X_test = scaler.transform(X_test)
+
+# ----- Random Forest -----
+rf = RandomForestClassifier(n_estimators=200, random_state=42)
+rf.fit(X_train, y_train)
+y_pred_rf = rf.predict(X_test)
+
+print("Random Forest Results:")
+print(classification_report(y_test, y_pred_rf))
+print("ROC-AUC:", roc_auc_score(y_test, rf.predict_proba(X_test)[:,1]))
+
+# ----- XGBoost -----
+xgb_model = xgb.XGBClassifier(n_estimators=300, learning_rate=0.05, max_depth=5, random_state=42)
+xgb_model.fit(X_train, y_train)
+y_pred_xgb = xgb_model.predict(X_test)
+
+print("\nXGBoost Results:")
+print(classification_report(y_test, y_pred_xgb))
+print("ROC-AUC:", roc_auc_score(y_test, xgb_model.predict_proba(X_test)[:,1]))
